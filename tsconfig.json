@@ -16,7 +16,7 @@
     "checkJs": false,
     "target": "es2015",
     "module": "ESNext",
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "types": ["node", "jest"]
   }
 }

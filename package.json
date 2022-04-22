@@ -1,5 +1,5 @@
 {
-  "name": "ts-prj-tpl",
+  "name": "js-concurrent",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -15,10 +15,7 @@
     "version": "npm run changelog && git add CHANGELOG.md"
   },
   "keywords": [
-    "typescript",
-    "npm",
-    "project",
-    "template"
+    "typescript", "npm", "concurrent"
   ],
   "author": "in1978",
   "license": "MIT",
