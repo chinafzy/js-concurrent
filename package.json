@@ -1,8 +1,31 @@
 {
   "name": "js-concurrent",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./executor": "./dist/executor.js",
+    "./fns": "./dist/fns.js",
+    "./weighted-queue": "./dist/weighted-queue.js"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/index"
+      ],
+      "executor": [
+        "dist/executor"
+      ],
+      "fns": [
+        "dist/fns"
+      ],
+      "weighted": [
+        "dist/weighted-queue"
+      ]
+    }
+  },
   "scripts": {
     "clear": "rm -rf dist",
     "build": "tsc -p tsconfig.build.json",
@@ -15,7 +38,9 @@
     "version": "npm run changelog && git add CHANGELOG.md"
   },
   "keywords": [
-    "typescript", "npm", "concurrent"
+    "typescript",
+    "npm",
+    "concurrent"
   ],
   "author": "in1978",
   "license": "MIT",
@@ -32,6 +57,7 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.5.1",
+    "jest-node-exports-resolver": "^1.1.6",
     "prettier": "^2.6.2",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"

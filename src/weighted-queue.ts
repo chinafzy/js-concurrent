@@ -1,12 +1,12 @@
 interface Queue<E> {
-  add(item: E)
+  add(item: E): boolean
 }
 
 /**
  * A queue with weighted members.
  *
  * let q = new WeightQueue();
- *
+ * 
  * q.add('weight_100', 100);
  *
  * q.add('weight_200', 200);

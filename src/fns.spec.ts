@@ -1,5 +1,12 @@
 import { sleep, until, singleShot, singleShare } from './fns'
 
+// import {Fns } from './fns'
+
+// sleep(22)
+
+// sleep()
+
+
 test('sleep', async () => {
   const stamp1 = new Date().getTime()
   await sleep(100)

@@ -1,4 +1,3 @@
-// import { FailStrategy } from 'dist/executor'
 import { sleep } from './fns'
 import WeightedQueue from './weighted-queue'
 
