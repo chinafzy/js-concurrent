@@ -70,5 +70,6 @@ module.exports = {
     'no-redeclare': 'off',
     'no-shadow': 'off',
     quotes: 'off',
+    'prefer-const': ['off', { destructuring: 'any', ignoreReadBeforeAssign: false }],
   },
 }

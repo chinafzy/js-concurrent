@@ -1,11 +1,10 @@
-import { sleep, until, singleShot, singleShare } from './fns'
+import { sleep, until, oneByOne, singleShare } from './fns'
 
 // import {Fns } from './fns'
 
 // sleep(22)
 
 // sleep()
-
 
 test('sleep', async () => {
   const stamp1 = new Date().getTime()
@@ -17,11 +16,10 @@ test('sleep', async () => {
 
 test('util', async () => {
   let b1 = false,
+    // eslint-disable-next-line prefer-const
     stamp1 = new Date().getTime()
 
-  setTimeout(() => {
-    b1 = true
-  }, 100)
+  setTimeout(() => (b1 = true), 100)
 
   await until(() => b1, -1, 5)
 
@@ -32,7 +30,7 @@ test('util', async () => {
   expect(used).toBeLessThanOrEqual(111)
 })
 
-test('singleShot', async () => {
+test('oneByOne', async () => {
   const interval = 50
 
   async function task() {
@@ -41,7 +39,8 @@ test('singleShot', async () => {
     // console.log(`now`, new Date(), new Date().getTime())
     return new Date().getTime()
   }
-  const single = singleShot(task)
+
+  const single = oneByOne(task)
 
   const ps = []
   for (let i = 0; i < 5; i++) {
@@ -59,11 +58,13 @@ test('singleShot', async () => {
 
 test('singleShare', async () => {
   let c = 1
+
   async function after100() {
     await sleep(100)
 
     return ++c
   }
+
   const single = singleShare(after100)
 
   const ps = []

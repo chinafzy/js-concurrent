@@ -11,7 +11,7 @@ test('simple', () => {
 
   for (let i = 1; i <= 10; i++) {
     expect(q.add(i)).toBe(true)
-    expect(q.size() == i)
+    expect(q.size() == i).toBe(true)
   }
   expect(q.add(100)).toBe(false)
   expect(q.size()).toBe(10)

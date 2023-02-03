@@ -1,26 +1,31 @@
-interface Queue<E> {
-  add(item: E): boolean
-}
+// interface Queue<E> {
+//   add(item: E): boolean
+//
+//   offer(item: E, weight?: number): boolean
+//
+//   peek(): E
+//
+//   poll(): E
+//
+//   size(): number
+// }
 
 /**
  * A queue with weighted members.
- *
+ *<pre>
  * let q = new WeightQueue();
- * 
+ *
  * q.add('weight_100', 100);
- *
  * q.add('weight_200', 200);
- *
  * q.add('weight_201', 200);
  *
  * q.poll() == 200
- *
+ * q.poll() == 201  //
  * q.poll() == 100
  *
- * q.poll() == 201  //
- *
+ *</pre>
  */
-class WeightedQueue<E> implements Queue<E> {
+class WeightedQueue<E> {
   capacity: number
   defaultWeight: number
   #m = new Map<number, E[]>()

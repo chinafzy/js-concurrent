@@ -1,17 +1,20 @@
+import { NowOrPromiseSupplier } from './common-types'
 import { sleep } from './fns'
 import WeightedQueue from './weighted-queue'
 
 type TaskItem = {
-  resolve: (v?: any) => void
-  reject: (v?: any) => void
+  resolve: (v?: unknown) => void
+  reject: (v?: unknown) => void
   name?: string
 }
 
-const failAways = (_err: any, _count: any) => -1
+const failAlways = (_err: unknown, _count: number) => -1
+
+const DEFAULT_WEIGHT = 1000
 
 type ExecuteOpts = {
   failStrategy?: FailStrategy
-  transformer?: (item: any) => any
+  weight?: number
 }
 
 type ExecutorOpts = ExecuteOpts & {
@@ -22,30 +25,36 @@ type ExecutorOpts = ExecuteOpts & {
 class Executor {
   con: number
   opts: ExecutorOpts
-  #q: WeightedQueue<TaskItem>
-  #rc = 0 // running count
+  /**
+   * task queue
+   */
+  _q: WeightedQueue<TaskItem>
+  /**
+   * running count
+   */
+  _rc = 0 // running count
 
-  static #ins_c = 0 // instance count.
+  static _ins_c = 0 // instance count.
 
   constructor(
     con = 1,
     opts: ExecutorOpts = {
-      name: '',
-      failStrategy: failAways,
+      failStrategy: failAlways,
       queueSize: 100000,
+      weight: DEFAULT_WEIGHT,
     },
   ) {
     this.con = con
     this.opts = opts
-    this.#q = new WeightedQueue(opts.queueSize)
+    this._q = new WeightedQueue(opts.queueSize, opts.weight)
 
-    Executor.#ins_c++
-    if (opts.name) opts.name = `Executor_${Executor.#ins_c}`
+    Executor._ins_c++
+    if (!opts.name) opts.name = `Executor_${Executor._ins_c}`
   }
 
-  async execute(task: () => any, opts: ExecuteOpts = {}) {
+  async execute<T>(task: NowOrPromiseSupplier<T>, opts: ExecuteOpts = {}): Promise<T> {
     const wrappedFn = async () => {
-      this.#rc++
+      this._rc++
       // console.log(`${this._c}`)
       try {
         let times = 0
@@ -53,8 +62,6 @@ class Executor {
           try {
             let ret = task()
             if (ret instanceof Promise) ret = await ret
-            const transformer = opts.transformer || this.opts.transformer
-            if (transformer) ret = transformer(ret)
 
             return ret
           } catch (e) {
@@ -69,30 +76,33 @@ class Executor {
           }
         }
       } finally {
-        this.#onRelease()
+        this._onRelease()
       }
     }
 
     // call directly
-    if (this.#rc < this.con) return await wrappedFn()
+    if (this._rc < this.con) return await wrappedFn()
 
     const p = new Promise((resolve, reject) => {
-      const ret = this.#q.add({
-        resolve,
-        reject,
-      })
+      const ret = this._q.add(
+        {
+          reject,
+          resolve,
+        },
+        opts.weight || this.opts.weight || DEFAULT_WEIGHT,
+      )
 
-      if (!ret) reject(`full-queue-size: ${this.#q.capacity}`)
+      if (!ret) reject(`full-queue-size: ${this._q.capacity}`)
     })
 
     return p.then(wrappedFn)
   }
 
-  async #onRelease() {
+  _onRelease() {
     // console.log(`${this.name} on_release`)
-    this.#rc--
+    this._rc--
 
-    const trigger = this.#q.poll()
+    const trigger = this._q.poll()
     if (trigger) {
       // console.log(`${this.name} find first trigger`)
       trigger.resolve()
@@ -108,36 +118,32 @@ export default Executor
 //   /**
 //    * @param err
 //    * @param tryCount
-//    * @returns < 0 means stop retrying; 0 means retry immediatey; RET > 0 means wait RET ms and then retry.
+//    * @returns < 0 means stop retrying; 0 means retry immediately; RET > 0 means wait RET ms and then retry.
 //    */
 //   (/** hahah*/ err: any, tryCount: number): number
 // }
-
-
-
 
 /**
  * Test
  *
  * @param err
  * @param tryCount
- * @returns RET<0 means stop retrying; RET==0 means retry immediatey; RET > 0 means wait RET ms and then retry.
+ * @returns RET<0 means stop retrying; RET==0 means retry immediately; RET > 0 means wait RET ms and then retry.
  */
-export type FailStrategy = (/** hahah*/ err: any, tryCount: number) => number
+export type FailStrategy = (err: unknown, tryCount: number) => number
 
-
-
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export namespace FailStrategy {
   export function retryAlways(maxTries: number, waitMs?: number): FailStrategy {
-    return (_err: any, tryCount: number) => (tryCount < maxTries ? waitMs : -1)
+    return (_err: unknown, tryCount: number) => (tryCount < maxTries ? waitMs : -1)
   }
 
   export function failAlways(): FailStrategy {
-    return (_err: any, _tryCount: number) => -1
+    return (_err: unknown, _tryCount: number) => -1
   }
 
   export function retryOnWhiteWords(words: string[], maxTries: number, waitMs?: number): FailStrategy {
-    return (err: string, tryCount: number) => {
+    return (err: unknown, tryCount: number) => {
       if (tryCount >= maxTries) return -1
 
       const errStr = err + ''

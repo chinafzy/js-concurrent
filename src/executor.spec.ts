@@ -5,7 +5,7 @@ test('complex', async () => {
   const executor = new Executor(2)
   const vs = []
 
-  function sleepAndPut(ms: number, v: any) {
+  function sleepAndPut(ms: number, v: unknown) {
     return executor.execute(async () => {
       vs.push(v + '_begin')
       await sleep(ms)
